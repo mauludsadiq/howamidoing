@@ -49,30 +49,10 @@
     </div>
   </div>
 
-  <script>
-    const emotionColors = [
-      {
-        emotion: 'calm',
-        color: 'green',
-        keywords: ['calm', 'peaceful', 'relaxed', 'content']
-      },
-      {
-        emotion: 'stressed',
-        color: 'red',
-        keywords: ['stressed', 'angry', 'overwhelmed', 'despondent', 'frustrated', 'upset']
-      },
-      {
-        emotion: 'sad',
-        color: 'blue',
-        keywords: ['sad', 'depressed', 'hopeless', 'unhappy']
-      },
-      {
-        emotion: 'inspired',
-        color: 'purple',
-        keywords: ['inspired', 'motivated', 'excited']
-      }
-    ];
+  <!-- Load your 14,000-emotion dataset -->
+  <script src="emotions.js"></script>
 
+  <script>
     const input = document.getElementById('emotionInput');
     const box = document.getElementById('colorBox');
     let lastKeystrokeTime = Date.now();
@@ -80,20 +60,20 @@
     input.addEventListener('input', () => {
       const val = input.value.toLowerCase();
       const forces = {};
-      
-      // Compute F(ωᵢ) for each possibility
+
+      // Compute forces over all 14,000 emotions
       for (let {emotion, keywords} of emotionColors) {
         forces[emotion] = 0;
         for (let word of keywords) {
           if (val.includes(word)) forces[emotion]++;
         }
       }
-      
+
       // Find strongest ω*: ω* = argmax F(ωᵢ)
       let maxForce = 0;
       let strongestEmotion = null;
       let totalForce = 0;
-      
+
       for (let emotion in forces) {
         const f = forces[emotion];
         totalForce += f;
@@ -102,14 +82,14 @@
           strongestEmotion = emotion;
         }
       }
-      
+
       // Calculate alignment α
       const alpha = (totalForce > 0) ? maxForce / totalForce : 0;
-      
+
       // Calculate entropy H
-      const H_Ω = Math.log2(emotionColors.length); // log₂(|Ω|)
+      const H_Ω = Math.log2(emotionColors.length);
       const H = H_Ω * (1 - alpha);
-      
+
       // Compute typing speed → transition duration
       const now = Date.now();
       const delta = now - lastKeystrokeTime;
@@ -121,7 +101,7 @@
       const clampedMs = Math.max(Math.min(speedMs, maxMs), minMs);
       const transitionSec = clampedMs / 1000;
       box.style.transition = `background-color ${transitionSec.toFixed(2)}s ease`;
-      
+
       // Collapse: update box color
       if (strongestEmotion) {
         const chosen = emotionColors.find(e => e.emotion === strongestEmotion);
@@ -129,8 +109,7 @@
       } else {
         box.style.background = '#eee'; // fallback
       }
-      
-      // Optional debug output
+
       console.log(`Alignment α=${alpha.toFixed(2)}, Entropy H=${H.toFixed(2)}, Transition=${transitionSec.toFixed(2)}s`);
     });
 

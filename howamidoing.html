@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>How Am I Doing?</title>
+    <style>
+      body, html {
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Lora', serif;
+      }
+      .box {
+        width: 80vw;
+        height: 60vh;
+        max-width: 600px;
+        max-height: 400px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #eee;
+        flex-direction: column;
+      }
+      input {
+        width: 40%;
+        height: 20%;
+        font-size: 1.2em;
+        padding: 10px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box" id="colorBox">
+      <input type="text" id="emotionInput" placeholder="How Am I Doing?">
+    </div>
+
+    <script>
+      const input = document.getElementById('emotionInput');
+      const box = document.getElementById('colorBox');
+
+      input.addEventListener('input', () => {
+        const val = input.value.toLowerCase();
+        if(val.includes('calm') || val.includes('happy')) box.style.background = '#A8E6A2';
+        else if(val.includes('stressed') || val.includes('angry')) box.style.background = '#F28B82';
+        else box.style.background = '#eee';
+      });
+
+      input.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') input.blur();
+      });
+    </script>
+  </body>
+</html>

@@ -1,121 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>How Am I Doing?</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: #f8f8f8;
-      font-family: Lora, serif;
+      font-family: 'Lora', serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      transition: background-color 0.3s;
     }
-    #colorBox {
-      width: 80vw;
-      max-width: 600px;
-      height: 60vh;
-      max-height: 400px;
-      background: #eee;
+    #prompt-box {
+      width: 40%;
+      max-width: 400px;
+      height: 20%;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 12px;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-      transition: background-color 0.5s ease;
-    }
-    #prompt {
+      padding: 16px;
+      box-sizing: border-box;
       text-align: center;
     }
-    #emotionInput {
-      width: 80%;
-      padding: 0.8em;
+    #prompt-box input {
+      width: 100%;
+      padding: 12px;
       font-size: 1.2em;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 8px;
       outline: none;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      #prompt-box {
+        width: 80%;
+        height: auto;
+      }
+      #prompt-box input {
+        font-size: 1em;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="colorBox">
-    <div id="prompt">
-      <p>How Am I Doing?</p>
-      <input type="text" id="emotionInput" placeholder="Type your feeling..." autocomplete="off"/>
-    </div>
+  <div id="prompt-box">
+    <div style="margin-bottom: 12px; font-size: 1.2em;">How Am I Doing?</div>
+    <input type="text" id="emotionInput" placeholder="Type how you feel..."/>
   </div>
 
-  <!-- Load your 14,000-emotion dataset -->
   <script src="emotions.js"></script>
-
   <script>
     const input = document.getElementById('emotionInput');
-    const box = document.getElementById('colorBox');
-    let lastKeystrokeTime = Date.now();
-
     input.addEventListener('input', () => {
-      const val = input.value.toLowerCase();
-      const forces = {};
-
-      // Compute forces over all 14,000 emotions
-      for (let {emotion, keywords} of emotionColors) {
-        forces[emotion] = 0;
-        for (let word of keywords) {
-          if (val.includes(word)) forces[emotion]++;
+      const words = input.value.toLowerCase().split(/\s+/);
+      let found = false;
+      for (const word of words) {
+        if (emotions[word]) {
+          document.body.style.backgroundColor = emotions[word];
+          found = true;
+          break;
         }
       }
-
-      // Find strongest ω*: ω* = argmax F(ωᵢ)
-      let maxForce = 0;
-      let strongestEmotion = null;
-      let totalForce = 0;
-
-      for (let emotion in forces) {
-        const f = forces[emotion];
-        totalForce += f;
-        if (f > maxForce) {
-          maxForce = f;
-          strongestEmotion = emotion;
-        }
+      if (!found) {
+        document.body.style.backgroundColor = '#ffffff';
       }
-
-      // Calculate alignment α
-      const alpha = (totalForce > 0) ? maxForce / totalForce : 0;
-
-      // Calculate entropy H
-      const H_Ω = Math.log2(emotionColors.length);
-      const H = H_Ω * (1 - alpha);
-
-      // Compute typing speed → transition duration
-      const now = Date.now();
-      const delta = now - lastKeystrokeTime;
-      lastKeystrokeTime = now;
-
-      const speedMs = delta;
-      const minMs = 100;
-      const maxMs = 2000;
-      const clampedMs = Math.max(Math.min(speedMs, maxMs), minMs);
-      const transitionSec = clampedMs / 1000;
-      box.style.transition = `background-color ${transitionSec.toFixed(2)}s ease`;
-
-      // Collapse: update box color
-      if (strongestEmotion) {
-        const chosen = emotionColors.find(e => e.emotion === strongestEmotion);
-        box.style.background = chosen.color;
-      } else {
-        box.style.background = '#eee'; // fallback
-      }
-
-      console.log(`Alignment α=${alpha.toFixed(2)}, Entropy H=${H.toFixed(2)}, Transition=${transitionSec.toFixed(2)}s`);
     });
-
-    input.addEventListener('keydown', (e) => {
+    input.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
-        console.log("NOW-collapse: User confirmed input, entropy → 0");
         e.preventDefault();
         input.blur();
       }

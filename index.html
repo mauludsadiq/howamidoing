@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How Am I Doing?</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Lora', serif;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      width: 80vw;
+      max-width: 600px;
+      height: 60vh;
+      max-height: 400px;
+      background: white;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+    button {
+      background: #A8E6A2;
+      color: #333;
+      border: none;
+      padding: 0.8rem 1.6rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #8cd58c;
+    }
+    @media (max-width: 600px) {
+      .container {
+        width: 95vw;
+        height: auto;
+        padding: 1rem;
+      }
+      p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="content">
+    <p>Imagine a quiet moment in your day, a pause to ask yourself, “How Am I Doing?” This isn’t just a question—it’s a gift to your heart. Our simple tool is a private space where you type how you feel, and a gentle color glows to reflect your emotions back to you. No scores, no judgments, just a soft mirror for your soul.</p>
+    <p>Type “I’m calm” and see green light up. Type “I’m stressed” and watch red emerge. Press Enter, and the color settles, inviting you to breathe and be present. It’s a moment of clarity, a chance to see yourself as you are, right now.</p>
+    <p>Built with care, “How Am I Doing?” keeps your reflections safe and private—no accounts needed unless you choose. It’s yours alone, a sanctuary to trust your journey. Try it today, and take that quiet step toward knowing yourself.</p>
+    <button onclick="location.href='howamidoing.html'">Try It Now</button>
+  </div>
+</body>
+</html>

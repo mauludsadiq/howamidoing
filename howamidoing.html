@@ -1,113 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>How Am I Doing?</title>
   <style>
     body {
       margin: 0;
+      padding: 0;
       height: 100vh;
-      background: #000;
       display: flex;
-      justify-content: center;
       align-items: center;
-    }
-    #outerBox {
-      background-color: black;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      max-width: 95vw;
-      transition: background-color 0.4s ease;
-    }
-    #innerBox {
+      justify-content: center;
+      font-family: sans-serif;
+      transition: background-color 0.5s ease;
       background-color: white;
-      width: 500px;
-      max-width: 90vw;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      padding: 20px;
-      box-sizing: border-box;
     }
-    #innerBox h1 {
+    .frame {
+      background: rgba(255,255,255,0.9);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.2);
       text-align: center;
-      font-size: 1.5rem;
-      margin: 0 0 20px;
+      width: 500px;
+      max-width: 90%;
     }
-    #textInput {
+    .frame h1 {
+      margin-bottom: 20px;
+    }
+    textarea {
       width: 100%;
-      border: 1px solid rgba(100,100,100,0.2);
-      border-radius: 4px;
-      padding: 10px;
-      font-size: 1rem;
+      min-height: 100px;
+      resize: vertical;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
       box-sizing: border-box;
-      overflow-y: hidden;
-      resize: none;
-      transition: border-color 0.3s ease;
-    }
-    #textInput:focus {
-      border-color: rgba(100,100,100,0.3);
       outline: none;
+      transition: border-color 0.3s;
+    }
+    textarea:focus {
+      border-color: #888;
     }
   </style>
 </head>
 <body>
-  <div id="outerBox">
-    <div id="innerBox">
-      <h1>How Am I Doing?</h1>
-      <textarea id="textInput" placeholder="Type your thoughts here..."></textarea>
-    </div>
+  <div class="frame">
+    <h1>How Am I Doing?</h1>
+    <textarea id="textInput" placeholder="Type how you feel..."></textarea>
   </div>
 
-  <script src="emotions.js"></script>
   <script>
-    const textInput = document.getElementById('textInput');
-    const outerBox = document.getElementById('outerBox');
+    const emotions = {
+      "happy": 0, "joy": 0, "cheerful":0, "sad":15, "angry":13, "fear":14, "calm":2, "love":3, "hope":4,
+      "excited":5, "encourage":6, "excellent":7, "apathy":11, "confused":12, "jealous":16, "hate":17, "guilt":18, "craving":19
+    };
 
-    function autoResize() {
-      textInput.style.height = 'auto';
-      textInput.style.height = textInput.scrollHeight + 'px';
+    const emotionColors = {
+      0: {h:100, s:60, l:50},  1: {h:200, s:70, l:55}, 2: {h:100, s:30, l:70}, 3: {h:330, s:70, l:55},
+      4: {h:45, s:85, l:55},   5: {h:30, s:90, l:50},  6: {h:180, s:65, l:50}, 7: {h:90, s:80, l:50},
+      8: {h:190, s:50, l:75},  9: {h:260, s:70, l:50}, 10:{h:50, s:80, l:40}, 11:{h:0, s:0, l:75},
+      12:{h:0, s:0, l:50},     13:{h:0, s:85, l:50},   14:{h:20, s:80, l:50}, 15:{h:220, s:50, l:60},
+      16:{h:280, s:70, l:50},  17:{h:0, s:95, l:35},   18:{h:30, s:60, l:35}, 19:{h:330, s:90, l:50}
+    };
+
+    const textInput = document.getElementById("textInput");
+
+    function detectEmotion(text) {
+      const words = text.toLowerCase().split(/\s+/);
+      let detectedId = 1; // default: neutral
+      for (let word of words) {
+        if (emotions[word] !== undefined) {
+          detectedId = emotions[word];
+          break;
+        }
+      }
+      return detectedId;
     }
 
-    function detectEmotionAndUpdateColor() {
-      const text = textInput.value.toLowerCase();
-      let detectedEmotionId = null;
-
-      if (typeof emotions !== 'undefined') {
-        for (const [word, id] of Object.entries(emotions)) {
-          if (text.includes(word.toLowerCase())) {
-            detectedEmotionId = id;
-            break;
-          }
-        }
-      } else {
-        console.error("emotions.js not loaded or empty!");
-      }
-
-      if (detectedEmotionId !== null) {
-        const color = getColorForEmotion(detectedEmotionId, 50);
-        outerBox.style.backgroundColor = color;
-      } else {
-        outerBox.style.backgroundColor = 'black';
-      }
+    function getColorForEmotion(emotionId) {
+      const base = emotionColors[emotionId] || emotionColors[1];
+      return `hsl(${base.h}, ${base.s}%, ${base.l}%)`;
     }
 
     textInput.addEventListener('input', () => {
-      autoResize();
-      detectEmotionAndUpdateColor();
+      const text = textInput.value.trim();
+      const emotionId = detectEmotion(text);
+      const color = getColorForEmotion(emotionId);
+      document.body.style.backgroundColor = color;
     });
 
     textInput.addEventListener('keydown', (e) => {
       if (e.key === "Enter") {
-        e.preventDefault(); // avoid adding a newline
-        detectEmotionAndUpdateColor();
+        e.preventDefault();
+        const text = textInput.value.trim();
+        const emotionId = detectEmotion(text);
+        const color = getColorForEmotion(emotionId);
+        document.body.style.backgroundColor = color;
       }
     });
-
-    autoResize();
   </script>
 </body>
 </html>

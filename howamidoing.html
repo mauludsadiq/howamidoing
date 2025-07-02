@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How Am I Doing?</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Lora, serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #000;
+      color: #fff;
+    }
+    #color-box {
+      width: 80vw;
+      height: 60vh;
+      max-width: 600px;
+      max-height: 400px;
+      margin-bottom: 20px;
+      border-radius: 16px;
+      transition: background-color 0.4s ease;
+    }
+    #emotion-input {
+      width: 80vw;
+      max-width: 600px;
+      font-size: 1.5em;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="color-box"></div>
+  <input type="text" id="emotion-input" placeholder="How Am I Doing?" autofocus />
+
+  <script src="emotions.js"></script>
+  <script>
+    const colorBox = document.getElementById("color-box");
+    const input = document.getElementById("emotion-input");
+
+    let lastTime = null;
+
+    input.addEventListener("input", () => {
+      const now = performance.now();
+      if (lastTime !== null) {
+        const delta = (now - lastTime) / 1000; // seconds
+        const cps = 1 / delta; // characters per second
+        const typingSpeed = Math.min(100, Math.round(cps * 15)); // scale 0-100
+        const words = input.value.toLowerCase().split(/\s+/);
+        let emotionId = 1; // default to neutral
+
+        const lastWord = words[words.length - 1];
+        if (emotions[lastWord] !== undefined) {
+          emotionId = emotions[lastWord];
+        }
+
+        const color = getColorForEmotion(emotionId, typingSpeed);
+        colorBox.style.backgroundColor = color;
+      }
+      lastTime = now;
+    });
+  </script>
+
+</body>
+</html>

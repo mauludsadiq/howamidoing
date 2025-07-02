@@ -2,87 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>How Am I Doing?</title>
   <style>
     body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
+      padding: 0;
+      background-color: hsl(200, 70%, 55%); /* neutral default */
       font-family: sans-serif;
-      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
-    .outer-box {
-      background-color: white;
-      border-radius: 12px;
-      padding: 40px;
-      box-shadow: 0 0 40px rgba(0,0,0,0.1);
-      width: 80%;
-      max-width: 700px;
-    }
-    .inner-box {
-      border: 4px solid transparent;
-      border-radius: 8px;
+    #container {
+      background: white;
+      border-radius: 10px;
       padding: 20px;
-      transition: border-color 0.3s;
-      min-height: 150px;
-      resize: none;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    textarea {
       width: 100%;
-      font-size: 18px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: none;
+      font-size: 16px;
       box-sizing: border-box;
     }
   </style>
 </head>
 <body>
-  <div class="outer-box">
-    <textarea class="inner-box" id="textInput" placeholder="How am I doing? Type your thoughts here..."></textarea>
+  <div id="container">
+    <h1>How Am I Doing?</h1>
+    <textarea id="input" rows="4" placeholder="Type your feelings..."></textarea>
   </div>
 
-  <!-- Include your local emotions.js -->
   <script src="emotions.js"></script>
-
   <script>
-    const textInput = document.getElementById("textInput");
+    const emotionColors = {
+      0: {h:100, s:60, l:50},  // happy
+      13: {h:0, s:85, l:50},   // anger
+      15: {h:220, s:50, l:60}, // sadness
+      // add more mappings as needed
+    };
 
+    const input = document.getElementById('input');
     let lastTime = Date.now();
-    let lastLength = 0;
 
-    textInput.addEventListener("input", () => {
-      const currentTime = Date.now();
-      const timeDiff = (currentTime - lastTime) / 1000; // seconds
-      const lengthDiff = textInput.value.length - lastLength;
-      const speed = lengthDiff / timeDiff; // chars per second
-      lastTime = currentTime;
-      lastLength = textInput.value.length;
+    function getTypingSpeed() {
+      const now = Date.now();
+      const elapsed = now - lastTime;
+      lastTime = now;
+      return Math.min(100, 60000 / Math.max(elapsed, 1)); // words per min estimate
+    }
 
-      // Determine emotion and color
-      const words = textInput.value.toLowerCase().match(/\b\w+\b/g) || [];
-      let highestEmotion = null;
-      let highestScore = -1;
+    function getColor(emotionId, speed) {
+      const base = emotionColors[emotionId] || {h:200, s:70, l:55}; // fallback neutral
+      const intensityShift = (0.5 - Math.min(speed / 100, 1)) * 20;
+      const l = Math.max(10, Math.min(90, base.l + intensityShift));
+      return `hsl(${base.h}, ${base.s}%, ${l}%)`;
+    }
 
+    function detectEmotion(text) {
+      let matchedId = null;
+      const words = text.toLowerCase().split(/\W+/);
       words.forEach(word => {
-        if (emotions[word] !== undefined && emotions[word] > highestScore) {
-          highestEmotion = emotions[word];
-          highestScore = emotions[word];
+        if (emotions[word] !== undefined) {
+          matchedId = emotions[word];
         }
       });
+      return matchedId;
+    }
 
-      if (highestEmotion !== null) {
-        const base = emotionColors[highestEmotion];
-        const speedFactor = Math.max(0, Math.min(speed, 15)) / 15; // normalized
-        const intensityShift = (0.5 - speedFactor) * 20; // ±10 l
-        const adjustedL = Math.max(10, Math.min(90, base.l + intensityShift));
-        const color = `hsl(${base.h}, ${base.s}%, ${adjustedL}%)`;
-        textInput.style.borderColor = color;
-      } else {
-        textInput.style.borderColor = "transparent";
+    input.addEventListener('input', () => {
+      const speed = getTypingSpeed();
+      const emotionId = detectEmotion(input.value);
+      const color = getColor(emotionId, speed);
+      document.body.style.backgroundColor = color;
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const speed = getTypingSpeed();
+        const emotionId = detectEmotion(input.value);
+        const color = getColor(emotionId, speed);
+        document.body.style.backgroundColor = color;
       }
-
-      // Grow the box with more text
-      textInput.style.height = "auto";
-      textInput.style.height = textInput.scrollHeight + "px";
     });
   </script>
 </body>
